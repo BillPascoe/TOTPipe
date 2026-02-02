@@ -1,0 +1,43 @@
+
+PDF scan and process:
+
+# This explains how to convert PDFs comprised of images of text (such as scanned or photographed documents or newspapers) into images (jpg) then into a plain text file.
+# It can also be used to convert images of text to plain text (such as photographs of a document or book pages), if you skip the pdftoppm step.
+
+# If you want to pay a subscription instead to save yourself the trouble, use ABBY or other prioprietary system. Otherwise...
+
+# INSTALL PREREQUISITES
+
+conda install -c conda-forge --override-channels tesseract poppler ghostscript
+pip install ocrmypdf img2pdf
+Install ImageMagick on your computer by downloading from their website, ensuring set path is checked during install. It will be available in the conda environment. May require reboot for the path to take effect.
+
+# CONFIRM INSTALL
+
+ocrmypdf --version
+tesseract --version
+pdfimages -v
+magick -version
+img2pdf --version
+
+# RUN PROCESS
+# In the terminal / command prompt go to the folder where the pdf or images are.
+# Run each of the below commands in order in the terminal/command prompt.
+# If you are processing a PDF the first step removes images that may have been generated from previous runs. 
+# Then convert the pdf to jpgs, then tidy up the jpegs a little, and convert text in them to plain text.
+# If you are starting with images, they should be named so they order by filename, alphabetically, or numerically, and
+# Skip the step to delete jpgs, and the call to pdftoppm. 
+# IE start with magick.
+
+
+del "%~dp0page-*.jpg" 2>nul
+pdftoppm -jpeg input.pdf page
+magick mogrify -colorspace Gray -auto-level -blur 1x1 -deskew 40% page-*.jpg
+echo.> combined.txt
+for %f in (page-*.jpg) do (
+  echo ===== %f =====>> combined.txt
+  tesseract "%f" stdout -l eng >> combined.txt
+)
+
+
+
